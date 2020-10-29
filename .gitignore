@@ -1,0 +1,5 @@
+# bi-product of python import
+__pycache__/
+
+# VSCode setting
+.vscode/
