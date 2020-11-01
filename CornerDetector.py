@@ -37,10 +37,10 @@ class CornerDetection(object):
         kernel_y = np.transpose(kernel_x)
 
         # calculate gradient map in X direction
-        I_x = scipy.signal.convolve2d(img, kernel_x)
+        I_x = scipy.signal.convolve2d(img, kernel_x, mode="same")
 
         # calculate gradient map in Y direction
-        I_y = scipy.signal.convolve2d(img, kernel_y)
+        I_y = scipy.signal.convolve2d(img, kernel_y, mode="same")
 
         # precompute I_x^2, I_y^2, I_x*I_y
         I_x2 = I_x**2
@@ -55,12 +55,16 @@ class CornerDetection(object):
         col_start = filter_size[1]//2
         col_end = h - filter_size[1]//2
 
-        corners = []
+        epsilon = 1e-1
+        corners = np.zeros((row_end - row_start, col_end - col_start))
         for i in range(row_start, row_end):
             for j in range(col_start, col_end):
-                Ix2 = np.sum(I_x2[i-filter_size[0]:i+filter_size[0], j-filter_size[1]:j+filter_size[1]] * filter)
-                Iy2 = np.sum(I_y2[i-filter_size[0]:i+filter_size[0], j-filter_size[1]:j+filter_size[1]] * filter)
-                Ixy = np.sum(I_xy[i-filter_size[0]:i+filter_size[0], j-filter_size[1]:j+filter_size[1]] * filter)
+                Ix2 = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
+                corners[i-1, j-1] = np.linalg.det(A) / (np.trace(A) + epsilon)
+        
 
 
         return 1
@@ -97,7 +101,7 @@ class CornerDetection(object):
     def box2dGeneration(dim=[3,3]):
 
         if len(dim) > 2:
-            # TODO: make this an exception
+            # TODO: make this an exception.
             print("Dimension must be 2d")
 
         if dim[0] != dim[1]:
@@ -109,7 +113,11 @@ class CornerDetection(object):
         return box_filter
 
 
-corner_detector = CornerDetection()
-img = cv2.imread("test.png", 0)
-print(img.shape)
-corners = corner_detector.corners(img)
+def main():
+    img = cv2.imread("test.png", 0)
+    corner_detector = CornerDetection()
+    corners = corner_detector.corners(img)
+
+
+if __name__ == '__main__':
+    main()
