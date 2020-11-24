@@ -57,17 +57,30 @@ class CornerDetection(object):
 
         epsilon = 1e-1
         corners = np.zeros((row_end - row_start, col_end - col_start))
-        for i in range(row_start, row_end):
-            for j in range(col_start, col_end):
-                Ix2 = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
-                corners[i-1, j-1] = np.linalg.det(A) / (np.trace(A) + epsilon)
-        
 
+        if algorithm == "harris":
+            # TODO: Too slow (10s to run), need to improve speed
+            for i in range(row_start, row_end):
+                for j in range(col_start, col_end):
+                    Ix2 = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
+                    corners[i-1, j-1] = 2 * np.linalg.det(A) / (np.trace(A) + epsilon)
+        elif algorithm == "forstner":
+            X, Y = np.meshgrid(range(row_end - row_start), range(col_end - col_start))
+            for i in range(row_start, row_end):
+                for j in range(col_start, col_end):
+                    Ix2 = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
+                    A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
+                    
 
         return 1
+    
+    def harrisCornerDetector(self, filter)
+
 
     def matchCorners(self, image1, image2):
         pass
