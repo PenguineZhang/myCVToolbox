@@ -27,8 +27,7 @@ class CornerDetection(object):
             elif w == 'gaussian':
                 filter = self.gaussian2dGeneration()
         else:
-            # TODO: raise exception here
-            raise FilterUnavailableError()
+            raise Exception("Filter option unavailable")
 
         # kernel for I_x
         kernel_x = 1/12 * np.array([[-1, 8, 0, -8, 1]])
