@@ -6,6 +6,11 @@ using namespace std;
 CornerDetector::CornerDetector  (string filename)
 {
     this->m_img = cv::imread(filename, CV_8U);
+    // cv::cvtColor(this->m_img, this->m_img, cv::COLOR_BGR2GRAY);
+
+    // cv::imshow("just read the image", this->m_img);
+    // cv::waitKey(0);
+
     if(m_img.empty())
     {
         cout << "\033[1;31mImage failed to open\033[0m" << endl;
@@ -53,10 +58,13 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
     cv::Mat I_y2 = this->m_Iy.mul(this->m_Iy);
     cv::Mat I_xy = this->m_Ix.mul(this->m_Iy);
 
-    cv::Mat corners = cv::Mat(this->m_img.rows, this->m_img.cols, CV_32FC1);
+    cv::Mat corners = cv::Mat(this->m_img.rows, this->m_img.cols, this->m_img.type());
 
 
-    cv::Mat filter(cv::Size(3,3), CV_32FC1, cv::Scalar(1));
+    cv::Mat filter(cv::Size(3,3), I_x2.type(), cv::Scalar(1));
+
+    cv::Mat A(cv::Size(2,2), CV_32F, cv::Scalar(0));
+
     int row_start = 1, row_end = this->m_img.rows - 1;
     int col_start = 1, col_end = this->m_img.cols - 1;
 
@@ -64,14 +72,18 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
     {
         for(int j = col_start; j < col_end; j++)
         {
-            cv::Mat A(cv::Size(2,2), CV_32FC1, cv::Scalar(0));
             A.at<float>(0, 0) = cv::sum(I_x2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(1, 1) = cv::sum(I_y2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(1, 0) = cv::sum(I_xy(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(0, 1) = A.at<float>(1, 0);
-            corners.at<float>(i, j) = 2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon);
+            corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon));
+            // cout << corners.at<float>(i, j) << endl;
         }
+        // cout << "hi\n";
     }
+    corners.convertTo(corners, CV_32FC1);
+    corners = corners/255;
+    // cout << corners.rows << " " << corners.cols << endl;
 
     cv::imshow("corner", corners);
     cv::waitKey(0);

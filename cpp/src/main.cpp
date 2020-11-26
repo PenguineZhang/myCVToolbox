@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-    string file = "/home/peng/code_playground/python_code/myCVToolbox/test.png";
+    string file = "test.png";
 
     CornerDetector cd = CornerDetector(file);
 
