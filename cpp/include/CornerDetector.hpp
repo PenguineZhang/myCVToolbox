@@ -21,6 +21,7 @@ class CornerDetector
         std::vector<std::pair<int, int>> harrisDetector(cv::Mat&);
         void replaceImage(cv::Mat&);
         void replaceKernel(cv::Mat&);
+        void nonMaximalSuppression(cv::Mat&, cv::Mat&, cv::Mat&);
 
     private:
         void computeGradientImage(cv::Mat&);

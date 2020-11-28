@@ -1,4 +1,5 @@
 #include "CornerDetector.hpp"
+#include <chrono>
 #include <vector>
 
 using namespace std;
@@ -6,10 +7,7 @@ using namespace std;
 CornerDetector::CornerDetector  (string filename)
 {
     this->m_img = cv::imread(filename, CV_8U);
-    // cv::cvtColor(this->m_img, this->m_img, cv::COLOR_BGR2GRAY);
-
-    // cv::imshow("just read the image", this->m_img);
-    // cv::waitKey(0);
+    this->m_img.convertTo(this->m_img, CV_32F);
 
     if(m_img.empty())
     {
@@ -58,16 +56,17 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
     cv::Mat I_y2 = this->m_Iy.mul(this->m_Iy);
     cv::Mat I_xy = this->m_Ix.mul(this->m_Iy);
 
-    cv::Mat corners = cv::Mat(this->m_img.rows, this->m_img.cols, this->m_img.type());
+    cv::Mat corners = cv::Mat(this->m_img.rows, this->m_img.cols, CV_32F);
 
 
-    cv::Mat filter(cv::Size(3,3), I_x2.type(), cv::Scalar(1));
+    cv::Mat filter = cv::Mat(cv::Size(3,3), CV_32F, cv::Scalar(1)) / 9;
 
-    cv::Mat A(cv::Size(2,2), CV_32F, cv::Scalar(0));
+    cv::Mat A = cv::Mat(cv::Size(2,2), CV_32F, cv::Scalar(0));
 
     int row_start = 1, row_end = this->m_img.rows - 1;
     int col_start = 1, col_end = this->m_img.cols - 1;
 
+    auto start = std::chrono::high_resolution_clock::now();
     for(int i = row_start; i < row_end; i++)
     {
         for(int j = col_start; j < col_end; j++)
@@ -76,19 +75,19 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
             A.at<float>(1, 1) = cv::sum(I_y2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(1, 0) = cv::sum(I_xy(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(0, 1) = A.at<float>(1, 0);
-            corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon));
+            corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon)) / 255;
             // cout << corners.at<float>(i, j) << endl;
         }
         // cout << "hi\n";
     }
-    corners.convertTo(corners, CV_32FC1);
-    corners = corners/255;
     // cout << corners.rows << " " << corners.cols << endl;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    cout << duration.count() << endl;
 
     cv::imshow("corner", corners);
     cv::waitKey(0);
-
-
 
     return {{1,2}};
 }
@@ -101,4 +100,28 @@ void CornerDetector::replaceImage(cv::Mat& img)
 void CornerDetector::replaceKernel(cv::Mat& kernel)
 {
 
+}
+
+void CornerDetector::nonMaximalSuppression(cv::Mat& src, cv::Mat& des, cv::Mat& window)
+{
+    assert(src.rows == des.rows);
+    assert(src.cols == des.cols);
+
+    cv::Size window_size = window.size();
+    int width = window_size.width;
+    int height = window_size.height;
+
+    for(int i = height/2; i < src.rows - height/2; i++)
+    {
+        for(int j = width/2; j < src.cols - width/2; j++)
+        {
+            cv::Mat ROI = src(cv::Range(i - height/2, i + height/2), cv::Range(j - width/2, j + width/2));
+
+            // TODO: implement max masking here
+            cv::Mat mask = cv::Mat(height, width, src.type(), cv::Scalar(0));
+
+
+            des(cv::Range(i - height/2, i + height/2), cv::Range(j - width/2, j + width/2)) = mask;
+        }
+    }
 }

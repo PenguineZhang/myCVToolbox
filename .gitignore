@@ -6,3 +6,6 @@ __pycache__/
 
 # cmake build folder
 build/
+
+# Mac folder
+.DS_Store/
