@@ -77,13 +77,10 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
             A.at<float>(1, 0) = cv::sum(I_xy(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
             A.at<float>(0, 1) = A.at<float>(1, 0);
             corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon));
-            // cout << corners.at<float>(i, j) << endl;
         }
-        // cout << "hi\n";
     }
-    corners.convertTo(corners, CV_32FC1);
-    corners = corners/255;
-    // cout << corners.rows << " " << corners.cols << endl;
+
+
 
     cv::imshow("corner", corners);
     cv::waitKey(0);

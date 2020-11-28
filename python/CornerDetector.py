@@ -1,4 +1,3 @@
-from Exceptions import *
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal
@@ -56,7 +55,7 @@ class CornerDetection(object):
 
         epsilon = 1e-1
         corners = np.zeros((row_end - row_start, col_end - col_start))
-
+        t = time.time()
         if algorithm == "harris":
             # TODO: Too slow (10s to run), need to improve speed
             for i in range(row_start, row_end):
@@ -74,11 +73,15 @@ class CornerDetection(object):
                     Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
                     Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
                     A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
-                    
+
+        print(time.time() - t)
+        cv2.imshow("hi", corners)
+        cv2.waitKey(0)
 
         return 1
-    
-    def harrisCornerDetector(self, filter)
+
+    def harrisCornerDetector(self, filter):
+        pass
 
 
     def matchCorners(self, image1, image2):
