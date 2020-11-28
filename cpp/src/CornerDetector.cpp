@@ -78,7 +78,6 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
             corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon)) / 255;
             // cout << corners.at<float>(i, j) << endl;
         }
-        // cout << "hi\n";
     }
     // cout << corners.rows << " " << corners.cols << endl;
     auto stop = std::chrono::high_resolution_clock::now();
