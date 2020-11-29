@@ -59,24 +59,27 @@ vector<pair<int, int>> CornerDetector::harrisDetector(cv::Mat& kernel)
     cv::Mat corners = cv::Mat(this->m_img.rows, this->m_img.cols, CV_32F);
 
 
-    cv::Mat filter = cv::Mat(cv::Size(3,3), CV_32F, cv::Scalar(1)) / 9;
-
+    // cv::Mat filter = cv::Mat(cv::Size(3,3), CV_32F, cv::Scalar(1)) / 9;
+    
     cv::Mat A = cv::Mat(cv::Size(2,2), CV_32F, cv::Scalar(0));
 
     int row_start = 1, row_end = this->m_img.rows - 1;
     int col_start = 1, col_end = this->m_img.cols - 1;
 
     auto start = std::chrono::high_resolution_clock::now();
+    int kernel_element_size = kernel.total() * kernel.total();;
+
     for(int i = row_start; i < row_end; i++)
     {
         for(int j = col_start; j < col_end; j++)
         {
-            A.at<float>(0, 0) = cv::sum(I_x2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
-            A.at<float>(1, 1) = cv::sum(I_y2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
-            A.at<float>(1, 0) = cv::sum(I_xy(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)).mul(filter))[0];
+            // TODO: inplment other weighting matrix in the future
+            // so far the box filter is easiest to implement 
+            A.at<float>(0, 0) = cv::sum(I_x2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)))[0] / kernel_element_size;//.mul(filter))[0];
+            A.at<float>(1, 1) = cv::sum(I_y2(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)))[0] / kernel_element_size;//.mul(filter))[0];
+            A.at<float>(1, 0) = cv::sum(I_xy(cv::Range(i - 1, i + 2), cv::Range(j - 1, j + 2)))[0] / kernel_element_size;//.mul(filter))[0];
             A.at<float>(0, 1) = A.at<float>(1, 0);
             corners.at<float>(i, j) = (2 * cv::determinant(A) /  (cv::trace(A)[0] + epsilon)) / 255;
-            // cout << corners.at<float>(i, j) << endl;
         }
     }
     // cout << corners.rows << " " << corners.cols << endl;

@@ -8,11 +8,11 @@ class CornerDetection(object):
     def __init__(self):
         pass
 
-    def corners(self, img: np.ndarray, algorithm='harris', w='box'):
+    def corners(self, img: np.ndarray, kernel: np.ndarray, algorithm='harris', w='box'):
         '''
         input: img - grayscale image needed to find corners
                algorithm - ['harris', 'forstner']
-               w - ['gaussian', 'box']
+               w : Weighting matrix for gradient image, available: ['gaussian', 'box']. Default is 'box' matrix
         '''
         if len(img.shape) > 2:
             raise NotGrayscaleImageError()
@@ -29,7 +29,7 @@ class CornerDetection(object):
             raise Exception("Filter option unavailable")
 
         # kernel for I_x
-        kernel_x = 1/12 * np.array([[-1, 8, 0, -8, 1]])
+        kernel_x = np.expand_dims(kernel.flatten(), 0)
 
         # kernel for I_y
         kernel_y = np.transpose(kernel_x)
@@ -56,15 +56,16 @@ class CornerDetection(object):
         epsilon = 1e-1
         corners = np.zeros((row_end - row_start, col_end - col_start))
         t = time.time()
+        A = np.zeros((2,2))
         if algorithm == "harris":
             # TODO: Too slow (10s to run), need to improve speed
             for i in range(row_start, row_end):
                 for j in range(col_start, col_end):
-                    Ix2 = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                    Iy2 = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                    Ixy = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1] * filter)
-                    A = np.array([[Ix2, Ixy], [Ixy, Iy2]])
-                    corners[i-1, j-1] = 2 * np.linalg.det(A) / (np.trace(A) + epsilon)
+                    A[0, 0] = np.sum(I_x2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1]) / kernel.size**2
+                    A[1, 1] = np.sum(I_y2[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1]) / kernel.size**2
+                    A[1, 0] = np.sum(I_xy[i-filter_size[0]//2:i+filter_size[0]//2+1, j-filter_size[1]//2:j+filter_size[1]//2+1]) / kernel.size**2
+                    A[0, 1] = A[1, 0]
+                    corners[i-1, j-1] = 2 * np.linalg.det(A) / (np.trace(A) + epsilon) / 255
         elif algorithm == "forstner":
             X, Y = np.meshgrid(range(row_end - row_start), range(col_end - col_start))
             for i in range(row_start, row_end):
@@ -130,8 +131,9 @@ class CornerDetection(object):
 
 def main():
     img = cv2.imread("test.png", 0)
+    kernel = 1/12 * np.array([[-1, 8, 0, -8, 1]])
     corner_detector = CornerDetection()
-    corners = corner_detector.corners(img)
+    corners = corner_detector.corners(img, kernel=kernel)
 
 
 if __name__ == '__main__':
