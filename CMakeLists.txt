@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(corner_detector)
+
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(OpenCV REQUIRED)
@@ -11,6 +12,6 @@ include_directories(
 
 file(GLOB FILES src/*.cpp include/*.hpp)
 
-add_executable(corner_detector ${FILES})
+add_executable(main ${FILES})
 
-target_link_libraries(corner_detector ${OpenCV_LIBS})
+target_link_libraries(main ${OpenCV_LIBS})

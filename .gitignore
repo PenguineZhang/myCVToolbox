@@ -1,11 +1,8 @@
-# bi-product of python import
-__pycache__/
-
 # VSCode setting
 .vscode/
 
 # cmake build folder
 build/
 
-# Mac folder
-.DS_Store/
+# Mac
+.DS_Store
