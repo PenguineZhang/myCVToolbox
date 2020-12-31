@@ -6,6 +6,8 @@ set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
 add_subdirectory(components)
 
-add_executable(main main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(main corner_detector utils)
+target_include_directories(${PROJECT_NAME} PUBLIC components)
+target_link_directories(${PROJECT_NAME} PUBLIC components)
+target_link_libraries(${PROJECT_NAME} corner_detector utils)

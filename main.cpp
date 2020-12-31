@@ -1,9 +1,9 @@
-#include "components/corner_detector/CornerDetector.hpp"
-#include "components/utils/utils.hpp"
+#include "corner_detector/CornerDetector.hpp"
+#include "utils/utils.hpp"
 
 int main(int argc, char** argv)
 {
-    string file = "../test.png";
+    string file = argv[1];
 
     CornerDetector cd = CornerDetector();
 

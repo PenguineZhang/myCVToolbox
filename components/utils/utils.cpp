@@ -20,6 +20,4 @@ void gaussianKernelGenerator(cv::Mat &kernel, int row, int col, double mean_x, d
             kernel.at<float>(i + row / 2, j + col / 2) = exp(-0.5 * (pow((i - mean_x) / sigma_x, 2) + pow((j - mean_y) / sigma_y, 2)));
         }
     }
-
-    std::cout << kernel << std::endl;
 }
