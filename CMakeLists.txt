@@ -1,17 +1,11 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(corner_detector)
+project(myCVtools)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
-find_package(OpenCV REQUIRED)
+add_subdirectory(components)
 
-include_directories( 
-    include
-    ${OpenCV_INCLUDE_DIRS} 
-)
+add_executable(main main.cpp)
 
-file(GLOB FILES src/*.cpp include/*.hpp)
-
-add_executable(main ${FILES})
-
-target_link_libraries(main ${OpenCV_LIBS})
+target_link_libraries(main corner_detector utils)
